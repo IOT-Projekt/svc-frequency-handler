@@ -71,3 +71,6 @@ def main() -> None:
         # Update old temperature
         old_temp = new_temp
         old_humidity = new_humidity
+        
+if __name__ == "__main__":
+    main()
