@@ -11,7 +11,7 @@ import os
 # Topic for frequency message
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "frequency")
 # Frequency levels in seconds
-FREQUENCY_LEVELS = {1: 2, 2: 5, 3: 10, 4: 20, 5: 30, 6: 60, 7: 120}
+FREQUENCY_LEVELS = {1: 2, 2: 5, 3: 10, 4: 20, 5: 30, 6: 45, 7: 60}
 
 # set up logging
 logging.basicConfig(level=logging.INFO)
