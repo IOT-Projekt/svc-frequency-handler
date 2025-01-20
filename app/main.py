@@ -20,16 +20,17 @@ logging.basicConfig(level=logging.INFO)
 def check_change_frequency_temp(old_temp, new_temp, current_level) -> int:
     # Check if the temperature changed or is the same
     if old_temp == new_temp:
-        return current_level + 1
+        return min((current_level + 1), 7)
     else:
-        return current_level - 1
-    
+        return max((current_level - 1), 1)
+
+
 def check_change_frequency_humidity(old_humidity, new_humidity, current_level) -> int:
     # Check if the temperature changed or is the same
     if old_humidity == new_humidity:
-        return max( current_level + 1, 5) 
+        return min((current_level + 1), 7)
     else:
-        return min( current_level - 1, 1)    
+        return max((current_level - 1), 1)
 
 
 def change_frequency(frequency_producer, level):
@@ -39,38 +40,48 @@ def change_frequency(frequency_producer, level):
     logging.info(f"Changed frequency to {FREQUENCY_LEVELS[level]} seconds.")
     return
 
+
 def main() -> None:
     # Set up Kafka
     logging.info("Setting up Kafka...")
     kafka_config = KafkaConfig()
-    consumer = setup_kafka_consumer(kafka_config, ["temperatures, humidity"])
+    consumer = setup_kafka_consumer(kafka_config, ["temperatures", "humidity"])
     frequency_producer = setup_kafka_producer(kafka_config)
-
+    
     # Initialize variables
     old_temp = None
     old_humidity = None
     current_level = 3
-    
+
     # Start consuming messages
     logging.info("Consuming messages...")
-    
+
     for message in consumer:
-        # Get the topic and set the new temperature or humidity
+        logging.info(f"current level: {current_level}")
+        
+        
+        # Get the message value and topic
         topic = message.topic
-        message = json.loads(message.value)
+        message = json.loads(message.value["message"])
+        logging.info(f"Received message: {topic} -> {message}")
+
+        # Check if the message is a temperature or humidity message and update the current level
         if topic == "temperatures":
-            new_temp = message["temperature"]
-            current_level = check_change_frequency_temp(old_temp, new_temp, current_level)
+            new_temp = message["temperature_c"]
+            current_level = check_change_frequency_temp(
+                old_temp, new_temp, current_level
+            )
+            old_temp = new_temp
         elif topic == "humidity":
             new_humidity = message["humidity"]
-            current_level = check_change_frequency_humidity(old_humidity, new_humidity, current_level)
-        
-        # Change frequency 
+            current_level = check_change_frequency_humidity(
+                old_humidity, new_humidity, current_level
+            )
+            old_humidity = new_humidity
+
+        # Change frequency
         change_frequency(frequency_producer, current_level)
-        
-        # Update old temperature
-        old_temp = new_temp
-        old_humidity = new_humidity
-        
+
+
 if __name__ == "__main__":
     main()

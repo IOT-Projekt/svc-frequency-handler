@@ -47,6 +47,7 @@ def setup_kafka_consumer(config: KafkaConfig, topics: List[str]) -> KafkaConsume
         group_id=config.group_id,
         bootstrap_servers=config.bootstrap_servers,
         value_deserializer=json_deserializer,
+        auto_offset_reset="latest",
     )
     return consumer
 
