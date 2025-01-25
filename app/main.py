@@ -9,7 +9,9 @@ import logging
 import os
 
 # Topic for frequency message
-KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "frequency")
+KAFKA_PRODUCEER_TOPIC = os.getenv("KAFKA_PRODUCER_TOPIC", "frequency")
+KAFKA_CONSUMER_TOPIC = os.getenv("KAFKA_CONSUMER_TOPIC", "temperatures")
+
 # Frequency levels in seconds
 FREQUENCY_LEVELS = {1: 2, 2: 5, 3: 10, 4: 20, 5: 30, 6: 45, 7: 60}
 
@@ -28,7 +30,7 @@ def check_change_frequency_temp(old_temp, new_temp, current_level) -> int:
 def change_frequency(frequency_producer, level):
     # Create payload with new frequency level and send it to Kafka
     payload = {"frequency": FREQUENCY_LEVELS[level]}
-    send_kafka_message(producer=frequency_producer, topic=KAFKA_TOPIC, payload=payload)
+    send_kafka_message(producer=frequency_producer, topic=KAFKA_PRODUCEER_TOPIC, payload=payload)
     logging.info(f"Changed frequency to {FREQUENCY_LEVELS[level]} seconds.")
     return
 
@@ -37,7 +39,7 @@ def main() -> None:
     # Set up Kafka
     logging.info("Setting up Kafka...")
     kafka_config = KafkaConfig()
-    consumer = setup_kafka_consumer(kafka_config, ["temperatures"])
+    consumer = setup_kafka_consumer(kafka_config, [KAFKA_CONSUMER_TOPIC])
     frequency_producer = setup_kafka_producer(kafka_config)
 
     # Initialize variables
