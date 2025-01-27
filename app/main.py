@@ -50,7 +50,7 @@ def main() -> None:
         logging.info(f"Current level: {current_level}")
 
         # Update the new temperature and get the new frequency level
-        new_temp = message["temperature_c"]
+        new_temp = message.value["temperature_c"]
         current_level = check_change_frequency_temp(old_temp, new_temp, current_level)
         old_temp = new_temp
 
